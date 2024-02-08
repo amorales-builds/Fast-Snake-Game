@@ -75,9 +75,10 @@ class Food {
 public:
 
     Vector2 position;
-    Texture2D texture;
 
-    /*          USED FOR IMAGE ( I don't have a good one rn )
+    /* Texture2D texture;   USED FOR IMAGE ( I don't have a good one rn )
+
+              
     Food(deque<Vector2> snakeBody) {
         Image image = LoadImage("C:/Users/ami10/Pictures/notebook_button_hover.PNG");
         texture = LoadTextureFromImage(image);
@@ -124,16 +125,19 @@ class Game {
 public:
     Snake snake = Snake();
     Food food = Food(snake.body);
+    Vector2 mousePoint = { 0.0f, 0.0f };
+
     bool running = true;
     bool pause = false;
     bool reset = false;
     bool newHighScore = false;
+    bool mute = false; 
     int score = 0;
     int highScore = 0;
     Sound eatSound;
     Sound wallSound;
     Sound pauseSound;
-    Sound resumeSound;
+    Sound unpauseSound;
     Sound highScoreSound;
 
     Game() {
@@ -141,7 +145,7 @@ public:
         eatSound = LoadSound("C:/Users/ami10/Music/terminalBell.mp3");
         wallSound = LoadSound("C:/Users/ami10/Music/break.mp3");
         pauseSound = LoadSound("C:/Users/ami10/Music/quickFixes.mp3");
-        resumeSound = LoadSound("C:/Users/ami10/Music/dingUp.mp3");
+        unpauseSound = LoadSound("C:/Users/ami10/Music/dingUp.mp3");
         highScoreSound = LoadSound("C:/Users/ami10/Music/dingUp2.mp3");
     }
 
@@ -149,6 +153,8 @@ public:
         UnloadSound(eatSound);
         UnloadSound(wallSound);
         UnloadSound(pauseSound);
+        UnloadSound(unpauseSound);
+        UnloadSound(highScoreSound);
         CloseAudioDevice();
     }
 
@@ -174,7 +180,9 @@ public:
             if (score > highScore) {
                 highScore++;
                 if (newHighScore == true) {
-                    PlaySound(highScoreSound);
+                    if (mute == false) {
+                        PlaySound(highScoreSound);
+                    }
                     newHighScore = false;
                 }
             }   
@@ -183,7 +191,9 @@ public:
                     newHighScore = true;
                 }
             }
-            PlaySound(eatSound);
+            if (mute == false) {
+                PlaySound(eatSound);
+            }
         }
     }
     void CheckCollisionWithEdges() {
@@ -209,7 +219,9 @@ public:
         running = false;
         reset = true;
         score = 0;
-        PlaySound(wallSound);
+        if (mute == false) {
+            PlaySound(wallSound);
+        }
     }
     void GamePause() {
         running = !running; 
@@ -232,13 +244,24 @@ int main()
         if (IsKeyPressed(KEY_SPACE) && game.reset == false) {
             game.GamePause();
             // sounds:
-            if (game.pause == true) {
+            if (game.pause == true && game.mute == false) {
                 PlaySound(game.pauseSound);
+                StopSound(game.eatSound); 
+                StopSound(game.highScoreSound);
+                StopSound(game.unpauseSound);
+                StopSound(game.wallSound);
             }
             else {
-                PlaySound(game.resumeSound);
+                if (game.mute == false) {
+                    PlaySound(game.unpauseSound);
+                }
             }
         }
+
+        if (IsKeyPressed(KEY_M)) {
+            game.mute = !game.mute;
+        }
+        
 
         if (eventTriggered(0.2 - (game.score * .0025))) {
             game.Update();
@@ -279,6 +302,13 @@ int main()
         }
         if (game.reset == true) {
             DrawText("Press ARROW KEYS to continue", 320, offset + cellSize * cellCount + 20, 30, darkGreen);
+        }
+        DrawRectangle(offset - 63, 855, cellSize + 5.5, cellSize, darkGreen);
+        if (game.mute == false) {
+            DrawText("MUTE", offset - 60, 865, 10, green);
+        }
+        else {
+            DrawText("MUTE", offset - 60, 865, 10, red);
         }
 
         game.Draw();
