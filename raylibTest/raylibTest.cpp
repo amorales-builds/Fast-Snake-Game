@@ -9,16 +9,25 @@
 
 using namespace std;
 
+// retro theme
 Color green = {126, 175, 96, 255};
 Color darkGreen = {43, 51, 24, 255};
 Color red = { 185, 71, 35, 255 };
 Color yellow = { 240, 250, 10, 255 };
+
+// pink theme
+Color pink = { 247, 190, 201, 255 };
+Color darkPink = { 214, 111, 111, 255 };
+Color lightYellow = { 255, 255, 194, 255 };
+Color white = { 255, 255, 250, 255 };
 
 int cellSize = 30;
 int cellCount = 25;
 int offset = 75;
 
 double lastUpdateTime = 0;
+
+bool theme = false;
 
 bool ElementInDeque(Vector2 element, deque<Vector2> deque) {
     for (unsigned int i = 0; i < deque.size(); i++) {
@@ -44,6 +53,7 @@ public:
     deque<Vector2> body = { Vector2{6,9}, Vector2{5,9}, Vector2{4,9} };
     Vector2 direction = { 1,0 };
     bool addSegment = false;
+    bool theme = false;
 
     void Draw() {
         for (unsigned int i = 0; i < body.size(); i++)
@@ -51,7 +61,13 @@ public:
             float x = body[i].x;
             float y = body[i].y;
             Rectangle segment = Rectangle{ offset + x * cellSize, offset + y * cellSize, (float)cellSize, (float)cellSize}; 
-            DrawRectangleRounded(segment, 0.5, 6, darkGreen);
+            if (theme == false) {
+                DrawRectangleRounded(segment, 0.5, 6, darkGreen);
+            }
+            else {
+                DrawRectangleRounded(segment, 0.5, 6, darkPink);
+            }
+            
             //DrawRectangle(x * cellSize, y * cellSize, cellSize, cellSize, darkGreen);
         }
     }
@@ -73,6 +89,8 @@ public:
 class Food {
 
 public:
+
+    bool theme = false;
 
     Vector2 position;
 
@@ -98,7 +116,13 @@ public:
 
     void Draw() {
         Rectangle ball = Rectangle{ (offset + position.x * cellSize) + 2, (offset + position.y * cellSize) + 2, (float)cellSize - 4, (float)cellSize - 4 };
-        DrawRectangleRounded(ball, 1, 10, yellow); // to curve rectangle into ball
+        if (theme == false) {
+            DrawRectangleRounded(ball, 1, 10, yellow); // to curve rectangle into ball
+        }
+        else {
+            DrawRectangleRounded(ball, 1, 10, white); // to curve rectangle into ball
+        }
+        
 
         //DrawRectangle(position.x * cellSize, position.y * cellSize, cellSize, cellSize, yellow); //used when no image
         //DrawTexture(texture, position.x * cellSize, position.y * cellSize, WHITE); // used when image
@@ -261,6 +285,12 @@ int main()
         if (IsKeyPressed(KEY_M)) {
             game.mute = !game.mute;
         }
+
+        if (IsKeyPressed(KEY_Q)) {
+            game.snake.theme = !game.snake.theme;
+            game.food.theme = !game.food.theme;
+            theme = !theme;
+        }
         
 
         if (eventTriggered(0.2 - (game.score * .0025))) {
@@ -292,23 +322,53 @@ int main()
         }
 
         // Drawing
-        ClearBackground(green);
-        DrawRectangleLinesEx(Rectangle{(float)offset - 5, (float)offset - 5, (float)cellSize * cellCount + 10, (float)cellSize * cellCount + 10}, 3, darkGreen);
-        DrawText("Fast Snake Game", offset - 5, 20, 40, darkGreen);
-        DrawText(TextFormat("score: %i", game.score), 680, 28, 30, darkGreen);
-        DrawText(TextFormat("High Score: %i", game.highScore), offset - 5, offset + cellSize * cellCount + 20, 20, yellow);
-        if (game.pause == true) {
-            DrawText("PAUSE", 645, offset + cellSize * cellCount + 12 , 50, red);
-        }
-        if (game.reset == true) {
-            DrawText("Press ARROW KEYS to continue", 320, offset + cellSize * cellCount + 20, 30, darkGreen);
-        }
-        DrawRectangle(offset - 63, 855, cellSize + 5.5, cellSize, darkGreen);
-        if (game.mute == false) {
-            DrawText("MUTE", offset - 60, 865, 10, green);
+        if (theme == false) {
+            ClearBackground(green);
+            DrawRectangleLinesEx(Rectangle{ (float)offset - 5, (float)offset - 5, (float)cellSize * cellCount + 10, (float)cellSize * cellCount + 10 }, 3, darkGreen);
+            DrawText("Fast Snake Game", offset - 5, 20, 40, darkGreen);
+            // score and hscore ui :
+            DrawText(TextFormat("score: %i", game.score), 680, 28, 30, darkGreen);
+            DrawText(TextFormat("High Score: %i", game.highScore), offset - 5, offset + cellSize * cellCount + 20, 20, yellow);
+            // PAUSE indicator :
+            if (game.pause == true) {
+                DrawText("PAUSE", 645, offset + cellSize * cellCount + 12, 50, red);
+            }
+            // Instructions indicator to continue game :
+            if (game.reset == true) {
+                DrawText("Press ARROW KEYS to continue", 320, offset + cellSize * cellCount + 20, 30, darkGreen);
+            }
+            // mute indicator :
+            DrawRectangle(offset - 63, 855, cellSize + 5.5, cellSize, darkGreen);
+            if (game.mute == false) {
+                DrawText("MUTE", offset - 60, 865, 10, green);
+            }
+            else {
+                DrawText("MUTE", offset - 60, 865, 10, red);
+            }
         }
         else {
-            DrawText("MUTE", offset - 60, 865, 10, red);
+            ClearBackground(pink);
+            DrawRectangleLinesEx(Rectangle{ (float)offset - 5, (float)offset - 5, (float)cellSize * cellCount + 10, (float)cellSize * cellCount + 10 }, 3, darkPink);
+            DrawText("Fast Snake Game", offset - 5, 20, 40, darkPink);
+            // score and hscore ui :
+            DrawText(TextFormat("score: %i", game.score), 680, 28, 30, darkPink);
+            DrawText(TextFormat("High Score: %i", game.highScore), offset - 5, offset + cellSize * cellCount + 20, 20, white);
+            // PAUSE indicator :
+            if (game.pause == true) {
+                DrawText("PAUSE", 645, offset + cellSize * cellCount + 12, 50, lightYellow);
+            }
+            // Instructions indicator to continue game :
+            if (game.reset == true) {
+                DrawText("Press ARROW KEYS to continue", 320, offset + cellSize * cellCount + 20, 30, darkPink);
+            }
+            // mute indicator :
+            DrawRectangle(offset - 63, 855, cellSize + 5.5, cellSize, darkPink);
+            if (game.mute == false) {
+                DrawText("MUTE", offset - 60, 865, 10, pink);
+            }
+            else {
+                DrawText("MUTE", offset - 60, 865, 10, lightYellow);
+            }
         }
 
         game.Draw();
