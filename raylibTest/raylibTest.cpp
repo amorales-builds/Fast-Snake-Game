@@ -1,6 +1,7 @@
 // Amisadai Morales
 // 7/Feb/2024
 // followed "Programming With Nick" YouTube tutorial, plus added pause system, a small high score system, and made the snake go faster with each point
+// more changes soon...
 
 #include <iostream>
 #include "raylib.h"
